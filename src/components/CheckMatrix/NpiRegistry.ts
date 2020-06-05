@@ -33,7 +33,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
   public static editForm = editForm;
 
   static builderInfo = {
-    title: 'Check Matrix',
+    title: 'NPI Registry',
     group: 'basic',
     icon: 'fa fa-table',
     weight: 70,
