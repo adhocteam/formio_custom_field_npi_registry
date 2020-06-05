@@ -12,7 +12,7 @@
     "webpack:prod": "webpack --config webpack.prod.js",
     "webpack:use": "webpack --config webpack.use.js",
     "webpack": "npm run webpack:dev && npm run webpack:prod && npm run webpack:use",
-    "build": "tsc && gulp templates && npm run webpack && node-sass ./src/sass/contrib.scss ./dist/formio-contrib.css --clean ",
+    "build": "tsc && gulp templates && npm run webpack && node-sass ./src/sass/contrib.scss ./dist/formio-contrib.css",
     "lint": "tslint -p .",
     "prepublish": "npm run build"
   },
