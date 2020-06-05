@@ -1,4 +1,4 @@
-import npiregistry from './CheckMatrix/NpiRegistry';
+import npiregistry from './NpiRegistry/NpiRegistry';
 declare const _default: {
     npiregistry: typeof npiregistry;
 };

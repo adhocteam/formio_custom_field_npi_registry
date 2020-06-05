@@ -1,6 +1,6 @@
 declare const _default: {
     components: {
-        npiregistry: typeof import("./components/CheckMatrix/NpiRegistry").default;
+        npiregistry: typeof import("./components/NpiRegistry/NpiRegistry").default;
     };
     templates: {
         bootstrap: {
