@@ -5,7 +5,7 @@
  */
 import { Components } from 'formiojs';
 const FieldComponent = (Components as any).components.field;
-import editForm from './CheckMatrix.form';
+import editForm from './NpiRegistry.form';
 
 /**
  * Here we will derive from the base component which all Form.io form components derive from.

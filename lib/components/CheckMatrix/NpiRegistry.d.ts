@@ -1,4 +1,4 @@
-import editForm from './CheckMatrix.form';
+import editForm from './NpiRegistry.form';
 declare const NpiRegistry_base: any;
 /**
  * Here we will derive from the base component which all Form.io form components derive from.
