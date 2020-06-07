@@ -3,7 +3,8 @@
  *
  * Get the base component class by referencing Formio.Components.components map.
  */
-import { Components } from 'formiojs';
+import {Components} from 'formiojs';
+
 const FieldComponent = (Components as any).components.field;
 import editForm from './NpiRegistry.form';
 
@@ -16,134 +17,133 @@ import editForm from './NpiRegistry.form';
  * @constructor
  */
 export default class NpiRegistry extends (FieldComponent as any) {
-  public checks: Array<Array<any>>;
-  constructor(component, options, data) {
-    super(component, options, data);
-    this.checks = [];
-  }
+    public checks: Array<Array<any>>;
 
-  static schema() {
-    return FieldComponent.schema({
-      type: 'npiregistry',
-      numRows: 3,
-      numCols: 3
-    });
-  }
+    constructor(component, options, data) {
+        super(component, options, data);
+        this.checks = [];
+    }
 
-  public static editForm = editForm;
+    static schema() {
+        return FieldComponent.schema({
+            type: 'npiregistry',
+            numRows: 1,
+            numCols: 1
+        });
+    }
 
-  static builderInfo = {
-    title: 'NPI Registry',
-    group: 'basic',
-    icon: 'fa fa-table',
-    weight: 70,
-    documentation: 'http://help.form.io/userguide/#table',
-    schema: NpiRegistry.schema()
-  }
+    public static editForm = editForm;
 
-  get tableClass() {
-    let tableClass = 'table ';
-    ['striped', 'bordered', 'hover', 'condensed'].forEach((prop) => {
-      if (this.component[prop]) {
-        tableClass += `table-${prop} `;
-      }
-    });
-    return tableClass;
-  }
+    static builderInfo = {
+        title: 'NPI Registry',
+        group: 'basic',
+        icon: 'fa fa-table',
+        weight: 70,
+        documentation: 'http://help.form.io/userguide/#table',
+        schema: NpiRegistry.schema()
+    }
 
-  renderCell(row, col) {
-    return this.renderTemplate('input', {
-      input: {
-        type: 'input',
-        ref: `${this.component.key}-${row}`,
-        attr: {
-          id: `${this.component.key}-${row}-${col}`,
-          class: 'form-control',
-          type: 'checkbox',
+    get tableClass() {
+        let tableClass = 'table ';
+        ['striped', 'bordered', 'hover', 'condensed'].forEach((prop) => {
+            if (this.component[prop]) {
+                tableClass += `table-${prop} `;
+            }
+        });
+        return tableClass;
+    }
+
+    renderCell(row, col) {
+        return this.renderTemplate('input', {
+            input: {
+                type: 'input',
+                ref: `${this.component.key}-${row}`,
+                attr: {
+                    id: `${this.component.key}-${row}-${col}`,
+                    class: 'form-control',
+                    type: 'checkbox',
+                }
+            }
+        });
+    }
+
+    public render(children) {
+        return super.render(this.renderTemplate('npiregistry', {
+            tableClass: this.tableClass,
+            renderCell: this.renderCell.bind(this)
+        }));
+    }
+
+    /**
+     * After the html string has been mounted into the dom, the dom element is returned here. Use refs to find specific
+     * elements to attach functionality to.
+     *
+     * @param element
+     * @returns {Promise}
+     */
+    attach(element) {
+        const refs = {};
+
+        for (let i = 0; i < this.component.numRows; i++) {
+            refs[`${this.component.key}`] = 'multiple';
         }
-      }
-    });
-  }
 
-  public render(children) {
-    return super.render(this.renderTemplate('npiregistry', {
-      tableClass: this.tableClass,
-      renderCell: this.renderCell.bind(this)
-    }));
-  }
+        this.loadRefs(element, refs);
 
-  /**
-   * After the html string has been mounted into the dom, the dom element is returned here. Use refs to find specific
-   * elements to attach functionality to.
-   *
-   * @param element
-   * @returns {Promise}
-   */
-  attach(element) {
-    const refs = {};
+        this.checks = Array.prototype.slice.call(this.refs[`${this.component.key}`], 0);
 
-    for (let i = 0; i < this.component.numRows; i++) {
-      refs[`${this.component.key}-${i}`] = 'multiple';
+        // Attach click events to each input in the row
+        this.checks.forEach(input => {
+            this.addEventListener(input, 'click', () => this.funk())
+        });
+
+        // Allow basic component functionality to attach like field logic and tooltips.
+        return super.attach(element);
     }
 
-    this.loadRefs(element, refs);
-
-    this.checks = [];
-    for (let i = 0; i < this.component.numRows; i++) {
-      this.checks[i] = Array.prototype.slice.call(this.refs[`${this.component.key}-${i}`], 0);
-
-      // Attach click events to each input in the row
-      this.checks[i].forEach(input => {
-        this.addEventListener(input, 'click', () => this.updateValue())
-      });
+    funk() {
+        this.updateValue();
     }
 
-    // Allow basic component functionality to attach like field logic and tooltips.
-    return super.attach(element);
-  }
-
-  /**
-   * Get the value of the component from the dom elements.
-   *
-   * @returns {Array}
-   */
-  getValue() {
-    var value = [];
-    for (var rowIndex in this.checks) {
-      var row = this.checks[rowIndex];
-      value[rowIndex] = [];
-      for (var colIndex in row) {
-        var col = row[colIndex];
-        value[rowIndex][colIndex] = !!col.checked;
-      }
+    /**
+     * Get the value of the component from the dom elements.
+     *
+     * @returns {Array}
+     */
+    getValue() {
+        // const el = (document.getElementById('credit_card') as HTMLSelectElement);
+        // const value = el.options[el.selectedIndex].value;
+        const selectElement = (this.refs[`${this.component.key}`][0] as HTMLSelectElement);
+        const value = selectElement.options[selectElement.selectedIndex].value;
+        console.log(value);
+        return value;
     }
-    return value;
-  }
 
-  /**
-   * Set the value of the component into the dom elements.
-   *
-   * @param value
-   * @returns {boolean}
-   */
-  setValue(value) {
-    if (!value) {
-      return;
-    }
-    for (var rowIndex in this.checks) {
-      var row = this.checks[rowIndex];
-      if (!value[rowIndex]) {
-        break;
-      }
-      for (var colIndex in row) {
-        var col = row[colIndex];
-        if (!value[rowIndex][colIndex]) {
-          return false;
+    /**
+     * Set the value of the component into the dom elements.
+     *
+     * @param value
+     * @returns {boolean}
+     */
+    setValue(value) {
+        console.log("setValue");
+        if (!value) {
+            return;
         }
-        let checked = value[rowIndex][colIndex] ? 1 : 0;
-        col.value = checked;
-        col.checked = checked;
-      }
+        for (var rowIndex in this.checks) {
+            var row = this.checks[rowIndex];
+            if (!value[rowIndex]) {
+                break;
+            }
+            for (var colIndex in row) {
+                var col = row[colIndex];
+                if (!value[rowIndex][colIndex]) {
+                    return false;
+                }
+                let checked = value[rowIndex][colIndex] ? 1 : 0;
+                col.value = checked;
+                col.checked = checked;
+            }
+        }
     }
-  }
 }

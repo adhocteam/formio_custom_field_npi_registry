@@ -32,12 +32,13 @@ export default class NpiRegistry extends NpiRegistry_base {
      * @returns {Promise}
      */
     attach(element: any): any;
+    funk(): void;
     /**
      * Get the value of the component from the dom elements.
      *
      * @returns {Array}
      */
-    getValue(): any[];
+    getValue(): string;
     /**
      * Set the value of the component into the dom elements.
      *
