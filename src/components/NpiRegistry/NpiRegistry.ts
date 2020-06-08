@@ -37,7 +37,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
     static builderInfo = {
         title: 'NPI Registry',
         group: 'basic',
-        icon: 'fa fa-table',
+        icon: 'fa fa-doctor',
         weight: 70,
         documentation: 'http://help.form.io/userguide/#table',
         schema: NpiRegistry.schema()
@@ -82,20 +82,20 @@ export default class NpiRegistry extends (FieldComponent as any) {
      * @returns {Promise}
      */
     attach(element) {
-        const refs = {};
-
-        for (let i = 0; i < this.component.numRows; i++) {
-            refs[`${this.component.key}`] = 'multiple';
-        }
-
-        this.loadRefs(element, refs);
-
-        this.checks = Array.prototype.slice.call(this.refs[`${this.component.key}`], 0);
-
-        // Attach click events to each input in the row
-        this.checks.forEach(input => {
-            this.addEventListener(input, 'click', () => this.funk())
-        });
+        // const refs = {};
+        //
+        // for (let i = 0; i < this.component.numRows; i++) {
+        //     refs[`${this.component.key}`] = 'multiple';
+        // }
+        //
+        // this.loadRefs(element, refs);
+        //
+        // this.checks = Array.prototype.slice.call(this.refs[`${this.component.key}`], 0);
+        //
+        // // Attach click events to each input in the row
+        // this.checks.forEach(input => {
+        //     this.addEventListener(input, 'click', () => this.funk())
+        // });
 
         // Allow basic component functionality to attach like field logic and tooltips.
         return super.attach(element);
