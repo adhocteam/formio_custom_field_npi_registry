@@ -112,7 +112,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
                 number
             }));
             optionsData.forEach(
-                (o, i) => {
+                o => {
                     select.options[select.options.length] = new Option(`${o.firstName} ${o.lastName} : ${o.address} : ${o.number}`, o.number)
                 }
             )

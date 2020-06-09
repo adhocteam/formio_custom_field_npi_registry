@@ -21,7 +21,6 @@ export default class NpiRegistry extends NpiRegistry_base {
         documentation: string;
         schema: any;
     };
-    get tableClass(): string;
     render(children: any): any;
     /**
      * After the html string has been mounted into the dom, the dom element is returned here. Use refs to find specific
@@ -33,7 +32,6 @@ export default class NpiRegistry extends NpiRegistry_base {
     attach(element: any): any;
     private inputHandler;
     private queryNPI;
-    private orBlank;
     private showList;
     /**
      * Get the value of the component from the dom elements.
