@@ -9,7 +9,7 @@ declare const NpiRegistry_base: any;
  * @constructor
  */
 export default class NpiRegistry extends NpiRegistry_base {
-    checks: Array<Array<any>>;
+    data: any;
     constructor(component: any, options: any, data: any);
     static schema(): any;
     static editForm: typeof editForm;
@@ -22,7 +22,6 @@ export default class NpiRegistry extends NpiRegistry_base {
         schema: any;
     };
     get tableClass(): string;
-    renderCell(row: any, col: any): any;
     render(children: any): any;
     /**
      * After the html string has been mounted into the dom, the dom element is returned here. Use refs to find specific
@@ -32,7 +31,9 @@ export default class NpiRegistry extends NpiRegistry_base {
      * @returns {Promise}
      */
     attach(element: any): any;
-    funk(): void;
+    private inputHandler;
+    private queryNPI;
+    private orBlank;
     /**
      * Get the value of the component from the dom elements.
      *
@@ -45,6 +46,6 @@ export default class NpiRegistry extends NpiRegistry_base {
      * @param value
      * @returns {boolean}
      */
-    setValue(value: any): boolean;
+    setValue(value: any): void;
 }
 export {};

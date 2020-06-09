@@ -17,7 +17,7 @@ import editForm from './NpiRegistry.form';
  * @constructor
  */
 export default class NpiRegistry extends (FieldComponent as any) {
-    public checks: Array<Array<any>>;
+    public data: any = {};
 
     constructor(component, options, data) {
         super(component, options, data);
@@ -53,24 +53,9 @@ export default class NpiRegistry extends (FieldComponent as any) {
         return tableClass;
     }
 
-    renderCell(row, col) {
-        return this.renderTemplate('input', {
-            input: {
-                type: 'input',
-                ref: `${this.component.key}-${row}`,
-                attr: {
-                    id: `${this.component.key}-${row}-${col}`,
-                    class: 'form-control',
-                    type: 'checkbox',
-                }
-            }
-        });
-    }
-
     public render(children) {
         return super.render(this.renderTemplate('npiregistry', {
-            tableClass: this.tableClass,
-            renderCell: this.renderCell.bind(this)
+            ref: `${this.component.key}`
         }));
     }
 
@@ -82,27 +67,43 @@ export default class NpiRegistry extends (FieldComponent as any) {
      * @returns {Promise}
      */
     attach(element) {
-        // const refs = {};
-        //
-        // for (let i = 0; i < this.component.numRows; i++) {
-        //     refs[`${this.component.key}`] = 'multiple';
-        // }
-        //
-        // this.loadRefs(element, refs);
-        //
-        // this.checks = Array.prototype.slice.call(this.refs[`${this.component.key}`], 0);
-        //
-        // // Attach click events to each input in the row
-        // this.checks.forEach(input => {
-        //     this.addEventListener(input, 'click', () => this.funk())
-        // });
+        // load refs
+        const refs = {};
+        const textFields = ['first-name', 'last-name', 'city', 'postal-code'];
+        const selectFields = ['state', 'address-type'];
+        [...textFields, ...selectFields, 'results'].forEach(field => {
+            refs[`${this.component.key}-${field}`] = 'multiple';
+        });
+        this.loadRefs(element, refs);
 
-        // Allow basic component functionality to attach like field logic and tooltips.
+        // add event listeners
+        textFields.forEach(field => {
+            this.addEventListener(this.refs[`${this.component.key}-${field}`][0], 'keyup', (e) => this.inputHandler(e));
+        });
+        selectFields.forEach(field => {
+            this.addEventListener(this.refs[`${this.component.key}-${field}`][0], 'change', (e) => this.inputHandler(e));
+        });
+        this.addEventListener(this.refs[`${this.component.key}-results`][0], 'click', () => this.updateValue());
+
         return super.attach(element);
     }
 
-    funk() {
-        this.updateValue();
+    private inputHandler(e) {
+        const nodeValue = e.target.attributes[0].nodeValue;
+        const fieldNameArray = nodeValue.split('-');
+        const fieldName = fieldNameArray.slice(1, fieldNameArray.length).join('_');
+        this.data[fieldName] = e.target.value;
+        this.queryNPI(this.data);
+    }
+
+    private queryNPI(data) {
+        const url = `https://npiregistry.cms.hhs.gov/api/?first_name=${this.orBlank(this.data.first_name)}&last_name=${this.orBlank(this.data.last_name)}&city=${this.orBlank(this.data.city)}&state=${this.orBlank(this.data.state)}&postal_code=${this.orBlank(this.data.postal_code)}&version=2.1`;
+        console.log(url);
+        console.log(data);
+    }
+
+    private orBlank(value) {
+        return value || '';
     }
 
     /**
@@ -113,7 +114,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
     getValue() {
         // const el = (document.getElementById('credit_card') as HTMLSelectElement);
         // const value = el.options[el.selectedIndex].value;
-        const selectElement = (this.refs[`${this.component.key}`][0] as HTMLSelectElement);
+        const selectElement = (this.refs[`${this.component.key}-results`][0] as HTMLSelectElement);
         const value = selectElement.options[selectElement.selectedIndex].value;
         console.log(value);
         return value;
@@ -127,23 +128,5 @@ export default class NpiRegistry extends (FieldComponent as any) {
      */
     setValue(value) {
         console.log("setValue");
-        if (!value) {
-            return;
-        }
-        for (var rowIndex in this.checks) {
-            var row = this.checks[rowIndex];
-            if (!value[rowIndex]) {
-                break;
-            }
-            for (var colIndex in row) {
-                var col = row[colIndex];
-                if (!value[rowIndex][colIndex]) {
-                    return false;
-                }
-                let checked = value[rowIndex][colIndex] ? 1 : 0;
-                col.value = checked;
-                col.checked = checked;
-            }
-        }
     }
 }
