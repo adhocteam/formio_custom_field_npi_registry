@@ -21,7 +21,6 @@ export default class NpiRegistry extends (FieldComponent as any) {
 
     constructor(component, options, data) {
         super(component, options, data);
-        this.checks = [];
     }
 
     static schema() {
