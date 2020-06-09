@@ -34,6 +34,7 @@ export default class NpiRegistry extends NpiRegistry_base {
     private inputHandler;
     private queryNPI;
     private orBlank;
+    private showList;
     /**
      * Get the value of the component from the dom elements.
      *

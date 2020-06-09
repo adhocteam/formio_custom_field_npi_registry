@@ -93,17 +93,45 @@ export default class NpiRegistry extends (FieldComponent as any) {
         const fieldNameArray = nodeValue.split('-');
         const fieldName = fieldNameArray.slice(1, fieldNameArray.length).join('_');
         this.data[fieldName] = e.target.value;
-        this.queryNPI(this.data);
+        delete this.data.submit;
+        // @ts-ignore
+        if (Object.values(this.data).find(v => v.length >= 3) != null) {
+            this.queryNPI(this.data);
+        }
     }
 
-    private queryNPI(data) {
-        const url = `https://npiregistry.cms.hhs.gov/api/?first_name=${this.orBlank(this.data.first_name)}&last_name=${this.orBlank(this.data.last_name)}&city=${this.orBlank(this.data.city)}&state=${this.orBlank(this.data.state)}&postal_code=${this.orBlank(this.data.postal_code)}&version=2.1`;
-        console.log(url);
-        console.log(data);
+    private queryNPI(params) {
+        const url = new URL('https://npiregistry.cms.hhs.gov/api/');
+        url.search = new URLSearchParams({...params, version: '2.1'}).toString();
+        fetch(`https://cors-anywhere.herokuapp.com/${url.toString()}`)
+            .then(response => response.json())
+            .then(data => this.showList(data))
+            .catch(resp => {
+                console.error(resp);
+            });
     }
 
     private orBlank(value) {
         return value || '';
+    }
+
+    private showList(data) {
+        const select = this.refs[`${this.component.key}-results`][0];
+        select.options.length = 0;
+        if (data.result_count >= 1) {
+            // tslint:disable-next-line:variable-name
+            const optionsData = data.results.map(({addresses, basic, number}) => ({
+                firstName: basic.first_name,
+                lastName: basic.last_name,
+                address: `${addresses[0].address_1}, ${addresses[0].city}, ${addresses[0].state}`,
+                number
+            }));
+            optionsData.forEach(
+                (o, i) => {
+                    select.options[select.options.length] = new Option(`${o.firstName} ${o.lastName} : ${o.address} : ${o.number}`, o.number)
+                }
+            )
+        }
     }
 
     /**
@@ -112,11 +140,8 @@ export default class NpiRegistry extends (FieldComponent as any) {
      * @returns {Array}
      */
     getValue() {
-        // const el = (document.getElementById('credit_card') as HTMLSelectElement);
-        // const value = el.options[el.selectedIndex].value;
         const selectElement = (this.refs[`${this.component.key}-results`][0] as HTMLSelectElement);
         const value = selectElement.options[selectElement.selectedIndex].value;
-        console.log(value);
         return value;
     }
 
@@ -127,6 +152,6 @@ export default class NpiRegistry extends (FieldComponent as any) {
      * @returns {boolean}
      */
     setValue(value) {
-        console.log("setValue");
+        // console.log("setValue");
     }
 }
