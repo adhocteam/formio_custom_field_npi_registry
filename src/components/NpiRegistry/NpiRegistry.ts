@@ -41,17 +41,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
         weight: 70,
         documentation: 'http://help.form.io/userguide/#table',
         schema: NpiRegistry.schema()
-    }
-
-    get tableClass() {
-        let tableClass = 'table ';
-        ['striped', 'bordered', 'hover', 'condensed'].forEach((prop) => {
-            if (this.component[prop]) {
-                tableClass += `table-${prop} `;
-            }
-        });
-        return tableClass;
-    }
+    };
 
     public render(children) {
         return super.render(this.renderTemplate('npiregistry', {
@@ -109,10 +99,6 @@ export default class NpiRegistry extends (FieldComponent as any) {
             .catch(resp => {
                 console.error(resp);
             });
-    }
-
-    private orBlank(value) {
-        return value || '';
     }
 
     private showList(data) {
