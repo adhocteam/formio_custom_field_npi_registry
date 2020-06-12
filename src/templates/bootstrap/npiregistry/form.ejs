@@ -3,16 +3,21 @@
         <form class="well" method="post" action="" enctype="multipart/form-data" onsubmit="saveDefaultForm('');return true;">
             <input type="hidden" name="csrfmiddlewaretoken" value="8UEQIFJQQffEuob9H6SZgCR9YxDHy06PKoTNyGofIb2PcWu3ELzhorlr8w87MfS8">
             <div class="form-group">
-                <small class="form-text text-muted">Enter your provider's, e.g. doctor or physician's, details so we can fetch their NPI records</small>
-                <br/>
+                <div class="row"><small class="form-text text-muted col-md-8">{{ctx.component.searchInstructions}}</small></div>
+            </div>
+            <div class="form-group">
                 <div class="row">
-                    <div class="col-md-5 col-md-2">
-                        <label class="control-label" for="id_first_name">First Name <span class="nonbold"> </span></label>
-                        <input id="npi-first-name" class="form-control" name="first_name" type="text" ref="{{ ctx.ref }}-first-name">
+                    <div class="col-md-3">
+                        <label class="control-label" for="id_number">NPI Number <span class="nonbold"> </span></label>
+                        <input id="npi_number" maxlength="10" class="form-control" name="number" type="text" ref="{{ ctx.ref }}_number">
                     </div>
-                    <div class="col-md-5 col-md-2">
+                    <div class="col-md-3">
+                        <label class="control-label" for="id_first_name">First Name <span class="nonbold"> </span></label>
+                        <input id="npi_first-name" class="form-control" name="first_name" type="text" ref="{{ ctx.ref }}_first_name">
+                    </div>
+                    <div class="col-md-3">
                         <label class="control-label" for="id_last_name">Last Name <span class="nonbold"> </span></label>
-                        <input id="npi-last-name" class="form-control" name="last_name" type="text" ref="{{ ctx.ref }}-last-name">
+                        <input id="npi_last-name" class="form-control" name="last_name" type="text" ref="{{ ctx.ref }}_last_name">
                     </div>
                 </div>
             </div>
@@ -20,11 +25,11 @@
                 <div class="row">
                     <div class="col-sm-5 col-md-2">
                         <label class="control-label" for="id_city">City <span class="nonbold"> </span>
-                        </label><input id="npi-city" class="form-control" name="city" type="text" ref="{{ ctx.ref }}-city">
+                        </label><input id="npi_city" class="form-control" name="city" type="text" ref="{{ ctx.ref }}_city">
                     </div>
                     <div class="col-sm-7 col-md-3">
                         <label class="control-label" for="id_state">State <span class="nonbold"> </span></label>
-                        <select name="state" class="form-control" id="npi-state" ref="{{ ctx.ref }}-state">
+                        <select name="state" class="form-control" id="npi_state" ref="{{ ctx.ref }}_state">
                             <option value="" selected="">Any</option>
                             <option value="AL">Alabama</option>
                             <option value="AK">Alaska</option>
@@ -91,11 +96,11 @@
                     </div>
                     <div class="col-sm-4 col-md-2">
                         <label class="control-label" for="id_postal_code">Postal Code <span class="nonbold"> </span></label>
-                        <input id="npi-postal-code" class="form-control" name="postal_code" type="text" ref="{{ ctx.ref }}-postal-code">
+                        <input id="npi_postal-code" class="form-control" name="postal_code" type="text" ref="{{ ctx.ref }}_postal_code">
                     </div>
                     <div class="col-sm-5 col-md-2">
                         <label class="control-label" for="addressType">Address Type <span class="nonbold"> </span></label>
-                        <select name="addressType" class="form-control" id="npi-address-type" ref="{{ ctx.ref }}-address-type">
+                        <select name="addressType" class="form-control" id="npi_address-type" ref="{{ ctx.ref }}_address_type">
                             <option value="ANY" selected="">Any</option>
                             <option value="PR">Primary Location</option>
                             <option value="SE">Secondary Location</option>
@@ -104,10 +109,13 @@
                 </div>
             </div>
             <div class="form-group">
-                <small class="form-text text-muted">Select your provider from the search results</small>
+                <small class="form-text text-muted">{{ctx.component.selectInstructions}}</small>
                 <div class="row">
-                    <div class="col-md-10 col-md-2">
-                        <select id="npi-results" size="3" class="form-control" ref="{{ ctx.ref }}-results">
+                    <div class="col-md-9">
+                        <div id="npi_results_spinner" class="spinner-border text-primary" role="status" ref="{{ ctx.ref }}_spinner">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <select id="npi_results" size="3" class="form-control" ref="{{ ctx.ref }}_results">
 
                         </select>
                     </div>

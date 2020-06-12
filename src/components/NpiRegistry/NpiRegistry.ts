@@ -58,28 +58,29 @@ export default class NpiRegistry extends (FieldComponent as any) {
     attach(element) {
         // load refs
         const refs = {};
-        const textFields = ['first-name', 'last-name', 'city', 'postal-code'];
-        const selectFields = ['state', 'address-type'];
+        const textFields = ['number', 'first_name', 'last_name', 'city', 'postal_code'];
+        const selectFields = ['enumeration_type', 'state', 'address_type'];
         [...textFields, ...selectFields, 'results'].forEach(field => {
-            refs[`${this.component.key}-${field}`] = 'multiple';
+            refs[`${this.component.key}_${field}`] = 'multiple';
         });
+        refs[`${this.component.key}_spinner`] = 'multiple';
         this.loadRefs(element, refs);
 
         // add event listeners
         textFields.forEach(field => {
-            this.addEventListener(this.refs[`${this.component.key}-${field}`][0], 'keyup', (e) => this.inputHandler(e));
+            this.addEventListener(this.refs[`${this.component.key}_${field}`][0], 'keyup', (e) => this.inputHandler(e));
         });
         selectFields.forEach(field => {
-            this.addEventListener(this.refs[`${this.component.key}-${field}`][0], 'change', (e) => this.inputHandler(e));
+            this.addEventListener(this.refs[`${this.component.key}_${field}`][0], 'change', (e) => this.inputHandler(e));
         });
-        this.addEventListener(this.refs[`${this.component.key}-results`][0], 'click', () => this.updateValue());
+        this.addEventListener(this.refs[`${this.component.key}_results`][0], 'click', () => this.updateValue());
 
         return super.attach(element);
     }
 
     private inputHandler(e) {
         const nodeValue = e.target.attributes[0].nodeValue;
-        const fieldNameArray = nodeValue.split('-');
+        const fieldNameArray = nodeValue.split('_');
         const fieldName = fieldNameArray.slice(1, fieldNameArray.length).join('_');
         this.data[fieldName] = e.target.value;
         delete this.data.submit;
@@ -92,6 +93,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
     private queryNPI(params) {
         const url = new URL('https://npiregistry.cms.hhs.gov/api/');
         url.search = new URLSearchParams({...params, version: '2.1'}).toString();
+        this.refs[`${this.component.key}_spinner`][0].style.visibility = 'visible';
         fetch(`https://cors-anywhere.herokuapp.com/${url.toString()}`)
             .then(response => response.json())
             .then(data => this.showList(data))
@@ -101,7 +103,8 @@ export default class NpiRegistry extends (FieldComponent as any) {
     }
 
     private showList(data) {
-        const select = this.refs[`${this.component.key}-results`][0];
+        const select = this.refs[`${this.component.key}_results`][0];
+        this.refs[`${this.component.key}_spinner`][0].style.visibility = 'hidden';
         select.options.length = 0;
         if (data.result_count >= 1) {
             // tslint:disable-next-line:variable-name
@@ -125,7 +128,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
      * @returns {Array}
      */
     getValue() {
-        const selectElement = (this.refs[`${this.component.key}-results`][0] as HTMLSelectElement);
+        const selectElement = (this.refs[`${this.component.key}_results`][0] as HTMLSelectElement);
         const value = selectElement.options[selectElement.selectedIndex].value;
         return value;
     }
