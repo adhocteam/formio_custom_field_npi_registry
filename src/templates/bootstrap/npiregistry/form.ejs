@@ -1,10 +1,14 @@
 <style>
     #npi_results_spinner {
-        z-index:2;
+        z-index: 2;
         display: block;
         position: absolute;
         visibility: hidden;
-        margin: 5px
+    }
+
+    #npi_table > thead > tr > th, #npi_table > tbody > tr > td {
+        cursor: pointer;
+        padding: .35rem .75rem;
     }
 </style>
 <div class="row">
@@ -124,9 +128,21 @@
                         <div id="npi_results_spinner" class="spinner-border text-primary" role="status" ref="{{ ctx.ref }}_spinner">
                             <span class="sr-only">Loading...</span>
                         </div>
-                        <select id="npi_results" size="3" class="form-control" ref="{{ ctx.ref }}_results">
-
-                        </select>
+                        <table id="npi_table" class="table table-striped" ref="{{ ctx.ref }}_results" style="font-size: .75em; visibility: hidden">
+                            <thead>
+                            <tr>
+                                <th scope="row">First Name</th>
+                                <th scope="row">Last Name</th>
+                                <th scope="row">NPI</th>
+                                <th scope="row">Address</th>
+                                <th scope="row">City</th>
+                                <th scope="row">State</th>
+                                <th scope="row">Zip</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

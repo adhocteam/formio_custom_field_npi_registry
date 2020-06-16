@@ -18,6 +18,8 @@ import editForm from './NpiRegistry.form';
  */
 export default class NpiRegistry extends (FieldComponent as any) {
     public data: any = {};
+    private table: HTMLTableElement;
+    private selectedNumber : string;
 
     constructor(component, options, data) {
         super(component, options, data);
@@ -44,7 +46,8 @@ export default class NpiRegistry extends (FieldComponent as any) {
 
     public render(children) {
         return super.render(this.renderTemplate('npiregistry', {
-            ref: `${this.component.key}`
+            ref: `${this.component.key}`,
+            sortTable: this.sortTable,
         }));
     }
 
@@ -73,7 +76,8 @@ export default class NpiRegistry extends (FieldComponent as any) {
         selectFields.forEach(field => {
             this.addEventListener(this.refs[`${this.component.key}_${field}`][0], 'change', (e) => this.inputHandler(e));
         });
-        this.addEventListener(this.refs[`${this.component.key}_results`][0], 'click', () => this.updateValue());
+
+        this.table = this.refs[`${this.component.key}_results`][0];
 
         return super.attach(element);
     }
@@ -93,6 +97,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
     private queryNPI(params) {
         const url = new URL('https://npiregistry.cms.hhs.gov/api/');
         url.search = new URLSearchParams({...params, version: '2.1'}).toString();
+        this.table.style.visibility = 'hidden';
         this.refs[`${this.component.key}_spinner`][0].style.visibility = 'visible';
         fetch(`https://cors-anywhere.herokuapp.com/${url.toString()}`)
             .then(response => response.json())
@@ -103,22 +108,89 @@ export default class NpiRegistry extends (FieldComponent as any) {
     }
 
     private showList(data) {
-        const select = this.refs[`${this.component.key}_results`][0];
         this.refs[`${this.component.key}_spinner`][0].style.visibility = 'hidden';
-        select.options.length = 0;
-        if (data.result_count >= 1) {
-            // tslint:disable-next-line:variable-name
-            const optionsData = data.results.map(({addresses, basic, number}) => ({
-                firstName: basic.first_name,
-                lastName: basic.last_name,
-                address: `${addresses[0].address_1}, ${addresses[0].city}, ${addresses[0].state}`,
-                number
-            }));
-            optionsData.forEach(
-                o => {
-                    select.options[select.options.length] = new Option(`${o.firstName} ${o.lastName} : ${o.address} : ${o.number}`, o.number)
+        this.table.style.visibility = 'visible';
+
+        const ths = this.table.getElementsByTagName('th');
+        Array.from(ths).forEach((th, i) => {
+            this.addEventListener(th, 'click', () => this.sortTable(i))
+        });
+
+        const tableBody = this.table.getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';
+
+        data.results.forEach(({addresses, basic, number}) => {
+            const newTr = `<tr><td>${basic.first_name}</td><td>${basic.last_name}</td><td>${number}</td><td>${addresses[0].address_1}</td><td>${addresses[0].city}</td><td>${addresses[0].state}</td><td>${addresses[0].postal_code.substring(0,5)}</td></tr>`;
+            const newRow = tableBody.insertRow(tableBody.rows.length);
+            newRow.innerHTML = newTr;
+            this.addEventListener(newRow, 'click', (e) => {
+                const trs = this.table.getElementsByTagName('tr');
+                Array.from(trs).map((tr) => tr.classList.remove('table-warning'));
+                e.currentTarget.classList.add('table-warning');
+                this.selectedNumber = number;
+                this.updateValue();
+            });
+        });
+    }
+
+    public sortTable(n) {
+        let rows;
+        let switching;
+        let i;
+        let x;
+        let y;
+        let shouldSwitch;
+        let dir;
+        let switchcount = 0;
+        switching = true;
+        // Set the sorting direction to ascending:
+        dir = 'asc';
+        /* Make a loop that will continue until
+        no switching has been done: */
+        while (switching && this.table != null) {
+            // Start by saying: no switching is done:
+            switching = false;
+            rows = this.table.rows;
+            /* Loop through all table rows (except the
+            first, which contains table headers): */
+            for (i = 1; i < (rows.length - 1); i++) {
+                // Start by saying there should be no switching:
+                shouldSwitch = false;
+                /* Get the two elements you want to compare,
+                one from current row and one from the next: */
+                x = rows[i].getElementsByTagName('TD')[n];
+                y = rows[i + 1].getElementsByTagName('TD')[n];
+                /* Check if the two rows should switch place,
+                based on the direction, asc or desc: */
+                if (dir === 'asc') {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        // If so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir === 'desc') {
+                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        // If so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
                 }
-            )
+            }
+            if (shouldSwitch) {
+                /* If a switch has been marked, make the switch
+                and mark that a switch has been done: */
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                // Each time a switch is done, increase this count by 1:
+                switchcount ++;
+            } else {
+                /* If no switching has been done AND the direction is "asc",
+                set the direction to "desc" and run the while loop again. */
+                if (switchcount === 0 && dir === 'asc') {
+                    dir = 'desc';
+                    switching = true;
+                }
+            }
         }
     }
 
@@ -128,9 +200,7 @@ export default class NpiRegistry extends (FieldComponent as any) {
      * @returns {Array}
      */
     getValue() {
-        const selectElement = (this.refs[`${this.component.key}_results`][0] as HTMLSelectElement);
-        const value = selectElement.options[selectElement.selectedIndex].value;
-        return value;
+        return this.selectedNumber;
     }
 
     /**
