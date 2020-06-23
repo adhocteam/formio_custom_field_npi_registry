@@ -10,8 +10,12 @@ declare const NpiRegistry_base: any;
  */
 export default class NpiRegistry extends NpiRegistry_base {
     data: any;
+    private results;
+    private fieldMap;
+    private sortFieldAscending;
     private table;
     private selectedNumber;
+    private timeout;
     constructor(component: any, options: any, data: any);
     static schema(): any;
     static editForm: typeof editForm;
@@ -34,8 +38,9 @@ export default class NpiRegistry extends NpiRegistry_base {
     attach(element: any): any;
     private inputHandler;
     private queryNPI;
-    private showList;
-    sortTable(n: any): void;
+    private destructureResults;
+    private sortResults;
+    private renderList;
     /**
      * Get the value of the component from the dom elements.
      *

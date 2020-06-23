@@ -20,10 +20,10 @@
             </div>
             <div class="form-group">
                 <div class="row">
-                    <div class="col-md-3">
-                        <label class="control-label" for="id_number">NPI Number <span class="nonbold"> </span></label>
-                        <input id="npi_number" maxlength="10" class="form-control" name="number" type="text" ref="{{ ctx.ref }}_number">
-                    </div>
+<!--                    <div class="col-md-3">-->
+<!--                        <label class="control-label" for="id_number">NPI Number <span class="nonbold"> </span></label>-->
+<!--                        <input id="npi_number" maxlength="10" class="form-control" name="number" type="text" ref="{{ ctx.ref }}_number">-->
+<!--                    </div>-->
                     <div class="col-md-3">
                         <label class="control-label" for="id_first_name">First Name <span class="nonbold"> </span></label>
                         <input id="npi_first-name" class="form-control" name="first_name" type="text" ref="{{ ctx.ref }}_first_name">
@@ -40,7 +40,7 @@
                         <label class="control-label" for="id_city">City <span class="nonbold"> </span>
                         </label><input id="npi_city" class="form-control" name="city" type="text" ref="{{ ctx.ref }}_city">
                     </div>
-                    <div class="col-sm-7 col-md-3">
+                    <div class="col-sm-7 col-md-2">
                         <label class="control-label" for="id_state">State <span class="nonbold"> </span></label>
                         <select name="state" class="form-control" id="npi_state" ref="{{ ctx.ref }}_state">
                             <option value="" selected="">Any</option>
@@ -128,21 +128,23 @@
                         <div id="npi_results_spinner" class="spinner-border text-primary" role="status" ref="{{ ctx.ref }}_spinner">
                             <span class="sr-only">Loading...</span>
                         </div>
-                        <table id="npi_table" class="table table-striped" ref="{{ ctx.ref }}_results" style="font-size: .75em; visibility: hidden">
-                            <thead>
-                            <tr>
-                                <th scope="row">First Name</th>
-                                <th scope="row">Last Name</th>
-                                <th scope="row">NPI</th>
-                                <th scope="row">Address</th>
-                                <th scope="row">City</th>
-                                <th scope="row">State</th>
-                                <th scope="row">Zip</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <div class="overflow-auto" style="max-height: 200px">
+                            <table id="npi_table" class="table table-striped" ref="{{ ctx.ref }}_results" style="font-size: .75em; visibility: hidden">
+                                <thead>
+                                <tr>
+                                    <th scope="row">First Name</th>
+                                    <th scope="row">Last Name</th>
+                                    <th scope="row">NPI</th>
+                                    <th scope="row">Address</th>
+                                    <th scope="row">City</th>
+                                    <th scope="row">State</th>
+                                    <th scope="row">Zip</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

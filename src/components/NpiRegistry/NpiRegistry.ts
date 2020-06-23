@@ -7,6 +7,7 @@ import {Components} from 'formiojs';
 
 const FieldComponent = (Components as any).components.field;
 import editForm from './NpiRegistry.form';
+import {log} from 'util';
 
 /**
  * Here we will derive from the base component which all Form.io form components derive from.
@@ -18,8 +19,12 @@ import editForm from './NpiRegistry.form';
  */
 export default class NpiRegistry extends (FieldComponent as any) {
     public data: any = {};
+    private results: any[];
+    private fieldMap: string[] = ['firstName', 'lastName', 'npi', 'street', 'city', 'state', 'zip'];
+    private sortFieldAscending: any[];
     private table: HTMLTableElement;
-    private selectedNumber : string;
+    private selectedNumber: string;
+    private timeout;
 
     constructor(component, options, data) {
         super(component, options, data);
@@ -78,6 +83,10 @@ export default class NpiRegistry extends (FieldComponent as any) {
         });
 
         this.table = this.refs[`${this.component.key}_results`][0];
+        const ths = this.table.getElementsByTagName('th');
+        Array.from(ths).forEach((th, i) => {
+            this.addEventListener(th, 'click', () => this.renderList(this.sortResults(this.results, i)))
+        });
 
         return super.attach(element);
     }
@@ -88,110 +97,74 @@ export default class NpiRegistry extends (FieldComponent as any) {
         const fieldName = fieldNameArray.slice(1, fieldNameArray.length).join('_');
         this.data[fieldName] = e.target.value;
         delete this.data.submit;
-        // @ts-ignore
-        if (Object.values(this.data).find(v => v.length >= 3) != null) {
-            this.queryNPI(this.data);
-        }
+        clearTimeout(this.timeout);
+
+        this.timeout = setTimeout(() => this.queryNPI(this.data), 500);
     }
 
     private queryNPI(params) {
+        this.sortFieldAscending = [null, null, null, null, null, null, null];
         const url = new URL('https://npiregistry.cms.hhs.gov/api/');
-        url.search = new URLSearchParams({...params, version: '2.1'}).toString();
+        url.search = new URLSearchParams({...params, version: '2.1', limit: 200}).toString();
         this.table.style.visibility = 'hidden';
         this.refs[`${this.component.key}_spinner`][0].style.visibility = 'visible';
         fetch(`https://cors-anywhere.herokuapp.com/${url.toString()}`)
             .then(response => response.json())
-            .then(data => this.showList(data))
+            .then(data => this.renderList(this.sortResults(this.destructureResults(data.results), 1)))
             .catch(resp => {
                 console.error(resp);
             });
     }
 
-    private showList(data) {
+    private destructureResults(results) {
+        // @ts-ignore
+        return results.map(({addresses, basic, number}) => (
+            {
+                firstName: basic.first_name,
+                lastName: basic.last_name,
+                npi: number,
+                street: addresses[0].address_1,
+                city: addresses[0].city,
+                state: addresses[0].state,
+                zip: addresses[0].postal_code.substring(0, 5),
+            }
+        ));
+    }
+
+    private sortResults(results, index) {
+        const currentValue = this.sortFieldAscending[index];
+        let newValue;
+        if (currentValue === null) {
+            newValue = 1;
+        } else {
+            newValue = currentValue * -1;
+        }
+        this.sortFieldAscending = [null, null, null, null, null, null, null];
+        this.sortFieldAscending[index] = newValue;
+        console.log(this.sortFieldAscending[index]);
+        const field = this.fieldMap[index];
+        this.results = results.sort((a, b) => (a[field] > b[field]) ? this.sortFieldAscending[index] : -this.sortFieldAscending[index]);
+        return results;
+    }
+
+    private renderList(results) {
         this.refs[`${this.component.key}_spinner`][0].style.visibility = 'hidden';
         this.table.style.visibility = 'visible';
 
-        const ths = this.table.getElementsByTagName('th');
-        Array.from(ths).forEach((th, i) => {
-            this.addEventListener(th, 'click', () => this.sortTable(i))
-        });
-
         const tableBody = this.table.getElementsByTagName('tbody')[0];
         tableBody.innerHTML = '';
-
-        data.results.forEach(({addresses, basic, number}) => {
-            const newTr = `<tr><td>${basic.first_name}</td><td>${basic.last_name}</td><td>${number}</td><td>${addresses[0].address_1}</td><td>${addresses[0].city}</td><td>${addresses[0].state}</td><td>${addresses[0].postal_code.substring(0,5)}</td></tr>`;
+        results.forEach((result) => {
+            const newTr = `<tr><td>${result.firstName}</td><td>${result.lastName}</td><td>${result.npi}</td><td>${result.street}</td><td>${result.city}</td><td>${result.state}</td><td>${result.zip}</td></tr>`;
             const newRow = tableBody.insertRow(tableBody.rows.length);
             newRow.innerHTML = newTr;
             this.addEventListener(newRow, 'click', (e) => {
                 const trs = this.table.getElementsByTagName('tr');
-                Array.from(trs).map((tr) => tr.classList.remove('table-warning'));
-                e.currentTarget.classList.add('table-warning');
-                this.selectedNumber = number;
+                Array.from(trs).map((tr) => tr.classList.remove('table-info'));
+                e.currentTarget.classList.add('table-info');
+                this.selectedNumber = result.npi;
                 this.updateValue();
             });
         });
-    }
-
-    public sortTable(n) {
-        let rows;
-        let switching;
-        let i;
-        let x;
-        let y;
-        let shouldSwitch;
-        let dir;
-        let switchcount = 0;
-        switching = true;
-        // Set the sorting direction to ascending:
-        dir = 'asc';
-        /* Make a loop that will continue until
-        no switching has been done: */
-        while (switching && this.table != null) {
-            // Start by saying: no switching is done:
-            switching = false;
-            rows = this.table.rows;
-            /* Loop through all table rows (except the
-            first, which contains table headers): */
-            for (i = 1; i < (rows.length - 1); i++) {
-                // Start by saying there should be no switching:
-                shouldSwitch = false;
-                /* Get the two elements you want to compare,
-                one from current row and one from the next: */
-                x = rows[i].getElementsByTagName('TD')[n];
-                y = rows[i + 1].getElementsByTagName('TD')[n];
-                /* Check if the two rows should switch place,
-                based on the direction, asc or desc: */
-                if (dir === 'asc') {
-                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                        // If so, mark as a switch and break the loop:
-                        shouldSwitch = true;
-                        break;
-                    }
-                } else if (dir === 'desc') {
-                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                        // If so, mark as a switch and break the loop:
-                        shouldSwitch = true;
-                        break;
-                    }
-                }
-            }
-            if (shouldSwitch) {
-                /* If a switch has been marked, make the switch
-                and mark that a switch has been done: */
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-                // Each time a switch is done, increase this count by 1:
-                switchcount ++;
-            } else {
-                /* If no switching has been done AND the direction is "asc",
-                set the direction to "desc" and run the while loop again. */
-                if (switchcount === 0 && dir === 'asc') {
-                    dir = 'desc';
-                    switching = true;
-                }
-            }
-        }
     }
 
     /**
